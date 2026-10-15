@@ -139,10 +139,20 @@
               </div>
 
               <div class="admin-actions">
-                <button type="button" class="tab-btn active" data-tab="usersTab">Usuarios</button>
-                <button type="button" class="tab-btn" data-tab="reportsTab">Reportes</button>
-                <button type="button" class="tab-btn" data-tab="managementTab">Gestión</button>
+                <button type="button" class="tab-btn active" data-tab="usersTab">
+                  Usuarios
+                </button>
+                <button type="button" class="tab-btn" data-tab="consumptionTabHU4">
+                  Consumo energético
+                </button>
+                <button type="button" class="tab-btn" data-tab="reportsTab">
+                  Reportes
+                </button>
+                <button type="button" class="tab-btn" data-tab="managementTab">
+                  Gestión
+                </button>
               </div>
+
 
               <div id="usersTab" class="admin-tab active">
                 <section class="panel admin-panel wide">
@@ -165,6 +175,45 @@
                   </table>
                 </section>
               </div>
+
+
+              <div id="consumptionTabHU4" class="admin-tab hidden">
+                <section class="panel admin-panel wide">
+                  <div class="panel-header">Consumo energético por usuario</div>
+
+                  <p>
+                    Consulta el consumo registrado y detecta usuarios cuyo
+                    consumo supere el límite de referencia.
+                  </p>
+
+                  <p id="consumptionStatusHU4" role="status" aria-live="polite">
+                    Consultando información...
+                  </p>
+
+                  <div class="table-container">
+                    <table class="users-table">
+                      <thead>
+                        <tr>
+                          <th>Usuario</th>
+                          <th>Correo</th>
+                          <th>Instalación</th>
+                          <th>Consumo</th>
+                          <th>Estado del consumo</th>
+                        </tr>
+                      </thead>
+                      <tbody id="consumptionTableHU4"></tbody>
+                    </table>
+                  </div>
+
+                  <p>
+                    <small>
+                      Límite de referencia: 2.000 kWh
+                      por usuario.
+                    </small>
+                  </p>
+                </section>
+              </div>
+
 
               <div id="reportsTab" class="admin-tab hidden">
                 <div class="workspace-grid report-grid">
@@ -190,245 +239,275 @@
                     </ul>
                   </section>
 
+
                   <section class="panel admin-panel wide">
                     <div class="panel-header">Resumen ejecutivo</div>
-                    <div class="report-summary">
-                      <div class="report-item">
-                        <span>Total mensual</span>
-                        <strong id="reportTotalKwh">7.200 kWh</strong>
-                      </div>
-                      <div class="report-item">
-                        <span>Promedio por usuario</span>
-                        <strong id="reportAverageKwh">1.800 kWh</strong>
-                      </div>
-                      <div class="report-item">
-                        <span>Reducción acumulada</span>
-                        <strong id="reportReduction">17,4%</strong>
-                      </div>
-                    </div>
-
-                  </section>
-                </div>
-              </div>
-
-              <div id="managementTab" class="admin-tab hidden">
-                <section class="panel admin-panel wide">
-                  <div class="panel-header">Gestión de usuarios</div>
-
-                  <form id="userForm" class="user-form">
-                    <input type="hidden" id="userId" />
 
                     <div class="form-row">
-                      <label>
-                        <span>Nombre</span>
-                        <input type="text" id="userName" placeholder="Nombre completo" required />
+                      <label for="reportStartDateHU5">
+                        <span>Fecha inicial</span>
+                        <input type="date" id="reportStartDateHU5" value="2026-10-01" required />
                       </label>
-                      <label>
-                        <span>Email</span>
-                        <input type="email" id="userEmail" placeholder="correo@empower.com" required />
+
+                      <label for="reportEndDateHU5">
+                        <span>Fecha final</span>
+                        <input type="date" id="reportEndDateHU5" value="2026-10-15" required />
                       </label>
                     </div>
 
-                    <div class="form-row">
-                      <label>
-                        <span>Rol</span>
-                        <select id="userRole">
-                          <option value="Analista">Analista</option>
-                          <option value="Supervisor">Supervisor</option>
-                          <option value="Administrador">Administrador</option>
-                        </select>
-                      </label>
-                      <label>
-                        <span>Instalación</span>
-                        <select id="userInstallation">
-                          <option value="Granja Solar">Granja Solar</option>
-                          <option value="Planta del Sur">Planta del Sur</option>
-                          <option value="Centro de Control">Centro de Control</option>
-                        </select>
-                      </label>
-                    </div>
-
-                    <div class="form-row single">
-                      <label>
-                        <span>Estado</span>
-                        <select id="userStatus">
-                          <option value="Activo">Activo</option>
-                          <option value="Pendiente">Pendiente</option>
-                          <option value="Inactivo">Inactivo</option>
-                        </select>
-                      </label>
-                    </div>
+                    <p class="report-help">
+                      Selecciona el período para generar el reporte de consumo.
+                    </p>
 
                     <div class="form-actions">
-                      <button type="submit" class="primary-btn small-submit">Guardar usuario</button>
-                      <button type="button" class="secondary-btn" id="cancelEditBtn">Cancelar</button>
+                      <button type="button" class="primary-btn" id="generateReportHU5">
+                        Generar reporte PDF
+                      </button>
                     </div>
-                  </form>
-                </section>
-              </div>
-            </div>
 
-            <div id="userView" class="role-view hidden">
-              <div class="page-title">Energy Monitoring Platform</div>
-              <h1 class="section-title">Mi consumo y ahorro</h1>
+                    <p id="reportStatusHU5" class="report-status" role="status" aria-live="polite"></p>
+                </div>
 
-              <div class="stats-grid user-stats">
-                <div class="metric-card primary">
-                  <span class="metric-label">Consumo actual</span>
-                  <strong>245 kWh</strong>
-                  <small>HU-01</small>
-                </div>
-                <div class="metric-card">
-                  <span class="metric-label">Meta de ahorro</span>
-                  <strong id="goalSummaryValue">18%</strong>
-                  <small>HU-6</small>
-                </div>
-                <div class="metric-card warning">
-                  <span class="metric-label">Alertas</span>
-                  <strong>3</strong>
-                  <small>HU-03</small>
-                </div>
-                <div class="metric-card success">
-                  <span class="metric-label">Recomendaciones</span>
-                  <strong>5</strong>
-                  <small>HU-02</small>
+                <div class="report-summary">
+                  <div class="report-item">
+                    <span>Total mensual</span>
+                    <strong id="reportTotalKwh">7.200 kWh</strong>
+                  </div>
+
+                  <div class="report-item">
+                    <span>Promedio por usuario</span>
+                    <strong id="reportAverageKwh">1.800 kWh</strong>
+                  </div>
+
+                  <div class="report-item">
+                    <span>Reducción acumulada</span>
+                    <strong id="reportReduction">17,4%</strong>
+                  </div>
                 </div>
               </div>
+              </section>
 
-              <div class="workspace-grid user-grid">
-                <section class="panel user-panel">
-                  <div class="panel-header">Consumo en tiempo real</div>
-                  <div class="gauge-box">
-                    <div class="gauge">
-                      <span>79%</span>
-                    </div>
-                  </div>
-                </section>
-
-                <section class="panel user-panel">
-                  <div class="panel-header">Recomendaciones de ahorro</div>
-
-                  <p id="recommendationLevel">
-                    Analizando consumo de demostración...
-                  </p>
-
-                  <ul class="tips-list" id="recommendationList">
-                    <li>Apaga los equipos que no estés utilizando.</li>
-                    <li>Aprovecha la iluminación natural.</li>
-                    <li>Desconecta cargadores cuando no los uses.</li>
-                  </ul>
-
-                </section>
-
-                <section class="panel user-panel">
-                  <div class="panel-header">Alertas activas</div>
-
-                  <p id="alertStatusHU8" role="status">
-                    Comprobando el consumo de demostración...
-                  </p>
-
-                  <ul class="alerts-list" id="alertListHU8"></ul>
-                </section>
-
-
-                <section class="panel user-panel wide">
-                  <div class="panel-header">Historial de consumo</div>
-
-                  <label for="historyPeriodHU9">Consultar periodo:</label>
-                  <select id="historyPeriodHU9">
-                    <option value="all">Todos los periodos</option>
-                    <option value="week">Últimos 7 días</option>
-                    <option value="month">Últimos 30 días</option>
-                  </select>
-
-                  <button type="button" id="downloadHistoryPDFHU11">
-                    Descargar PDF
-                  </button>
-                  <p id="historySummaryHU9" role="status">
-                    Consulta tu historial de consumo energético.
-                  </p>
-
-                  <div class="table-container">
-                    <table class="users-table">
-                      <thead>
-                        <tr>
-                          <th>Periodo</th>
-                          <th>Consumo</th>
-                          <th>Variación</th>
-                        </tr>
-                      </thead>
-                      <tbody id="historyTableHU9"></tbody>
-                    </table>
-                  </div>
-                </section>
-
-
-                <section class="panel user-panel wide">
-                  <div class="panel-header">Comparación de consumo</div>
-
-                  <p>Selecciona dos periodos para comparar tu consumo energético.</p>
-
-                  <div class="form-row">
-                    <label for="comparePeriod1HU10">
-                      Primer periodo
-                      <select id="comparePeriod1HU10">
-                        <option value="week">Últimos 7 días</option>
-                        <option value="month">Últimos 30 días</option>
-                      </select>
-                    </label>
-
-                    <label for="comparePeriod2HU10">
-                      Segundo periodo
-                      <select id="comparePeriod2HU10">
-                        <option value="previous">Periodo anterior</option>
-                        <option value="week">Últimos 7 días</option>
-                        <option value="month">Últimos 30 días</option>
-                      </select>
-                    </label>
-                  </div>
-
-                  <button type="button" id="compareButtonHU10">
-                    Comparar periodos
-                  </button>
-
-                  <div id="comparisonResultHU10" role="status" aria-live="polite">
-                    Selecciona los periodos y pulsa Comparar.
-                  </div>
-                </section>
-
-
-                <section class="panel user-panel wide">
-                  <div class="panel-header">Metas de ahorro</div>
-
-                  <div class="goal-row">
-                    <span>Meta mensual</span>
-                    <span>Define cuánto quieres ahorrar</span>
-                  </div>
-
-                  <form id="goalForm">
-                    <label for="goalInput">
-                      Reducción de consumo deseada (%)
-                    </label>
-
-                    <input type="number" id="goalInput" min="1" max="50" value="18" required />
-
-                    <button type="submit">Guardar meta</button>
-                  </form>
-
-                  <div class="progress">
-                    <div class="progress-bar" id="goalProgressBar" style="width: 0%"></div>
-                  </div>
-
-                  <p id="goalProgressText">Progreso: 0%</p>
-                  <p id="goalMessage" role="status"></p>
-                </section>
-
-              </div>
             </div>
           </div>
-        </main>
+
+          <div id="managementTab" class="admin-tab hidden">
+            <section class="panel admin-panel wide">
+              <div class="panel-header">Gestión de usuarios</div>
+
+              <form id="userForm" class="user-form">
+                <input type="hidden" id="userId" />
+
+                <div class="form-row">
+                  <label>
+                    <span>Nombre</span>
+                    <input type="text" id="userName" placeholder="Nombre completo" required />
+                  </label>
+                  <label>
+                    <span>Email</span>
+                    <input type="email" id="userEmail" placeholder="correo@empower.com" required />
+                  </label>
+                </div>
+
+                <div class="form-row">
+                  <label>
+                    <span>Rol</span>
+                    <select id="userRole">
+                      <option value="Analista">Analista</option>
+                      <option value="Supervisor">Supervisor</option>
+                      <option value="Administrador">Administrador</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Instalación</span>
+                    <select id="userInstallation">
+                      <option value="Granja Solar">Granja Solar</option>
+                      <option value="Planta del Sur">Planta del Sur</option>
+                      <option value="Centro de Control">Centro de Control</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="form-row single">
+                  <label>
+                    <span>Estado</span>
+                    <select id="userStatus">
+                      <option value="Activo">Activo</option>
+                      <option value="Pendiente">Pendiente</option>
+                      <option value="Inactivo">Inactivo</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="form-actions">
+                  <button type="submit" class="primary-btn small-submit">Guardar usuario</button>
+                  <button type="button" class="secondary-btn" id="cancelEditBtn">Cancelar</button>
+                </div>
+              </form>
+            </section>
+          </div>
+      </div>
+
+      <div id="userView" class="role-view hidden">
+        <div class="page-title">Energy Monitoring Platform</div>
+        <h1 class="section-title">Mi consumo y ahorro</h1>
+
+        <div class="stats-grid user-stats">
+          <div class="metric-card primary">
+            <span class="metric-label">Consumo actual</span>
+            <strong>245 kWh</strong>
+            <small>HU-01</small>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Meta de ahorro</span>
+            <strong id="goalSummaryValue">18%</strong>
+            <small>HU-6</small>
+          </div>
+          <div class="metric-card warning">
+            <span class="metric-label">Alertas</span>
+            <strong>3</strong>
+            <small>HU-03</small>
+          </div>
+          <div class="metric-card success">
+            <span class="metric-label">Recomendaciones</span>
+            <strong>5</strong>
+            <small>HU-02</small>
+          </div>
+        </div>
+
+        <div class="workspace-grid user-grid">
+          <section class="panel user-panel">
+            <div class="panel-header">Consumo en tiempo real</div>
+            <div class="gauge-box">
+              <div class="gauge">
+                <span>79%</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel user-panel">
+            <div class="panel-header">Recomendaciones de ahorro</div>
+
+            <p id="recommendationLevel">
+              Analizando consumo de demostración...
+            </p>
+
+            <ul class="tips-list" id="recommendationList">
+              <li>Apaga los equipos que no estés utilizando.</li>
+              <li>Aprovecha la iluminación natural.</li>
+              <li>Desconecta cargadores cuando no los uses.</li>
+            </ul>
+
+          </section>
+
+          <section class="panel user-panel">
+            <div class="panel-header">Alertas activas</div>
+
+            <p id="alertStatusHU8" role="status">
+              Comprobando el consumo de demostración...
+            </p>
+
+            <ul class="alerts-list" id="alertListHU8"></ul>
+          </section>
+
+
+          <section class="panel user-panel wide">
+            <div class="panel-header">Historial de consumo</div>
+
+            <label for="historyPeriodHU9">Consultar periodo:</label>
+            <select id="historyPeriodHU9">
+              <option value="all">Todos los periodos</option>
+              <option value="week">Últimos 7 días</option>
+              <option value="month">Últimos 30 días</option>
+            </select>
+
+            <button type="button" id="downloadHistoryPDFHU11">
+              Descargar PDF
+            </button>
+            <p id="historySummaryHU9" role="status">
+              Consulta tu historial de consumo energético.
+            </p>
+
+            <div class="table-container">
+              <table class="users-table">
+                <thead>
+                  <tr>
+                    <th>Periodo</th>
+                    <th>Consumo</th>
+                    <th>Variación</th>
+                  </tr>
+                </thead>
+                <tbody id="historyTableHU9"></tbody>
+              </table>
+            </div>
+          </section>
+
+
+          <section class="panel user-panel wide">
+            <div class="panel-header">Comparación de consumo</div>
+
+            <p>Selecciona dos periodos para comparar tu consumo energético.</p>
+
+            <div class="form-row">
+              <label for="comparePeriod1HU10">
+                Primer periodo
+                <select id="comparePeriod1HU10">
+                  <option value="week">Últimos 7 días</option>
+                  <option value="month">Últimos 30 días</option>
+                </select>
+              </label>
+
+              <label for="comparePeriod2HU10">
+                Segundo periodo
+                <select id="comparePeriod2HU10">
+                  <option value="previous">Periodo anterior</option>
+                  <option value="week">Últimos 7 días</option>
+                  <option value="month">Últimos 30 días</option>
+                </select>
+              </label>
+            </div>
+
+            <button type="button" id="compareButtonHU10">
+              Comparar periodos
+            </button>
+
+            <div id="comparisonResultHU10" role="status" aria-live="polite">
+              Selecciona los periodos y pulsa Comparar.
+            </div>
+          </section>
+
+
+          <section class="panel user-panel wide">
+            <div class="panel-header">Metas de ahorro</div>
+
+            <div class="goal-row">
+              <span>Meta mensual</span>
+              <span>Define cuánto quieres ahorrar</span>
+            </div>
+
+            <form id="goalForm">
+              <label for="goalInput">
+                Reducción de consumo deseada (%)
+              </label>
+
+              <input type="number" id="goalInput" min="1" max="50" value="18" required />
+
+              <button type="submit">Guardar meta</button>
+            </form>
+
+            <div class="progress">
+              <div class="progress-bar" id="goalProgressBar" style="width: 0%"></div>
+            </div>
+
+            <p id="goalProgressText">Progreso: 0%</p>
+            <p id="goalMessage" role="status"></p>
+          </section>
+
+        </div>
       </div>
     </div>
+    </main>
+  </div>
+  </div>
   </div>
 
 

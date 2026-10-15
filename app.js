@@ -100,6 +100,21 @@ function setRoleView(role) {
     : 'linear-gradient(135deg, #d8f2d0, #a8d9b5)';
 }
 
+
+
+/* HU-4 y HU-5: consumo de demostración por usuario */
+
+function getConsumption(user) {
+  if (Number.isFinite(user.consumption)) {
+    return user.consumption;
+  }
+
+  if (user.role === 'Administrador') return 2100;
+  if (user.role === 'Supervisor') return 1500;
+
+  return 1200;
+}
+
 // Actualizar las métricas del panel
 
 function updateMetrics() {
@@ -110,15 +125,15 @@ function updateMetrics() {
   // Consumo de demostración asignado a cada usuario.
   // Se conserva mientras el prototipo no tenga mediciones reales.
   const getConsumption = (user) => {
-  if (Number.isFinite(user.consumption)) {
-    return user.consumption;
-  }
+    if (Number.isFinite(user.consumption)) {
+      return user.consumption;
+    }
 
-  if (user.role === 'Administrador') return 2100;
-  if (user.role === 'Supervisor') return 1500;
+    if (user.role === 'Administrador') return 2100;
+    if (user.role === 'Supervisor') return 1500;
 
-  return 1200;
-};
+    return 1200;
+  };
 
   const totalKwh = userRows.reduce(
     (sum, user) => sum + getConsumption(user),
@@ -163,6 +178,8 @@ function updateMetrics() {
     reportAverageKwh.textContent =
       `${Math.round(averageKwh).toLocaleString('es-CO')} kWh`;
   }
+
+  renderConsumptionHU4();
 }
 
 
@@ -174,13 +191,12 @@ function renderUsers() {
       <td>${user.role}</td>
       <td>${user.installation}</td>
       <td>
-        <span class="status ${
-          user.status === 'Activo'
-            ? 'ok'
-            : user.status === 'Pendiente'
-              ? 'warn'
-              : ''
-        }">
+        <span class="status ${user.status === 'Activo'
+      ? 'ok'
+      : user.status === 'Pendiente'
+        ? 'warn'
+        : ''
+    }">
           ${user.status}
         </span>
       </td>
@@ -277,6 +293,72 @@ function renderUsers() {
     });
   });
 }
+
+
+/* HU-4: visualizar el consumo energético de todos los usuarios */
+
+const consumptionTableHU4 =
+  document.getElementById('consumptionTableHU4');
+
+const consumptionStatusHU4 =
+  document.getElementById('consumptionStatusHU4');
+
+const consumptionLimitHU4 = 2000;
+
+function renderConsumptionHU4() {
+  if (!consumptionTableHU4 || !consumptionStatusHU4) {
+    return;
+  }
+
+  consumptionTableHU4.replaceChildren();
+
+  if (userRows.length === 0) {
+    consumptionStatusHU4.textContent =
+      'No hay datos de consumo disponibles.';
+
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+
+    cell.colSpan = 5;
+    cell.textContent = 'No existen registros de consumo.';
+    row.appendChild(cell);
+    consumptionTableHU4.appendChild(row);
+
+    return;
+  }
+
+  consumptionStatusHU4.textContent =
+    `Se muestran ${userRows.length} usuarios con consumo de demostración.`;
+
+  userRows.forEach((user) => {
+    const row = document.createElement('tr');
+    const consumption = getConsumption(user);
+
+    const values = [
+      user.name,
+      user.email,
+      user.installation,
+      `${consumption.toLocaleString('es-CO')} kWh`,
+      consumption > consumptionLimitHU4
+        ? 'Consumo alto'
+        : 'Dentro del límite'
+    ];
+
+    values.forEach((value, index) => {
+      const cell = document.createElement('td');
+      cell.textContent = value;
+
+      if (index === 4 && consumption > consumptionLimitHU4) {
+        cell.classList.add('status', 'warn');
+      }
+
+      row.appendChild(cell);
+    });
+
+    consumptionTableHU4.appendChild(row);
+  });
+}
+
 
 // Mostrar una pestaña del panel
 function showTab(tabId) {
@@ -990,5 +1072,162 @@ if (compareButtonHU10) {
   compareButtonHU10.addEventListener(
     'click',
     compareConsumptionHU10
+  );
+}
+
+/* HU-5: generar reporte general por periodo */
+
+const generateReportHU5 =
+  document.getElementById('generateReportHU5');
+
+const reportStatusHU5 =
+  document.getElementById('reportStatusHU5');
+
+const reportStartDateHU5 =
+  document.getElementById('reportStartDateHU5');
+
+const reportEndDateHU5 =
+  document.getElementById('reportEndDateHU5');
+
+// Registros de consumo de demostración con fecha.
+// En una versión con base de datos, estos registros
+// provendrían de las mediciones almacenadas.
+const reportConsumptionRecordsHU5 = [
+  {
+    userId: 1,
+    date: '2026-10-05',
+    consumption: 1200
+  },
+  {
+    userId: 2,
+    date: '2026-10-08',
+    consumption: 1500
+  },
+  {
+    userId: 3,
+    date: '2026-10-12',
+    consumption: 2100
+  },
+  {
+    userId: 4,
+    date: '2026-10-14',
+    consumption: 1200
+  }
+];
+
+function generateGeneralReportHU5() {
+  const startDate = reportStartDateHU5.value;
+  const endDate = reportEndDateHU5.value;
+
+  // Validar que ambas fechas estén seleccionadas.
+  if (!startDate || !endDate) {
+    reportStatusHU5.textContent =
+      'Selecciona la fecha inicial y la fecha final.';
+    return;
+  }
+
+  // Validar el rango seleccionado.
+  if (startDate > endDate) {
+    reportStatusHU5.textContent =
+      'El rango no es válido: la fecha inicial no puede ser posterior a la fecha final.';
+    return;
+  }
+
+  // Filtrar los registros dentro del periodo, incluyendo
+  // la fecha inicial y la fecha final.
+  const filteredRecords =
+    reportConsumptionRecordsHU5.filter((record) =>
+      record.date >= startDate &&
+      record.date <= endDate
+    );
+
+  // HU-5: si no hay registros, no generar el PDF.
+  if (filteredRecords.length === 0) {
+    reportStatusHU5.textContent =
+      'No hay datos disponibles para generar el reporte en el período seleccionado.';
+    return;
+  }
+
+  // Verificar que la biblioteca PDF esté disponible.
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    reportStatusHU5.textContent =
+      'No se pudo cargar la biblioteca para generar el PDF. Verifica tu conexión e inténtalo nuevamente.';
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+
+  const total = filteredRecords.reduce(
+    (sum, record) => sum + record.consumption,
+    0
+  );
+
+  const average = total / filteredRecords.length;
+
+  pdf.setFontSize(16);
+  pdf.text('EMPower - Reporte general de consumo', 14, 20);
+
+  pdf.setFontSize(10);
+  pdf.text(
+    `Fecha de generación: ${new Date().toLocaleDateString('es-CO')}`,
+    14,
+    30
+  );
+
+  pdf.text(`Periodo: ${startDate} al ${endDate}`, 14, 37);
+  pdf.text('Datos de demostración', 14, 44);
+  pdf.text(`Registros encontrados: ${filteredRecords.length}`, 14, 51);
+  pdf.text(`Consumo total: ${total.toLocaleString('es-CO')} kWh`, 14, 58);
+  pdf.text(
+    `Promedio por registro: ${Math.round(average).toLocaleString('es-CO')} kWh`,
+    14,
+    65
+  );
+
+  let y = 80;
+
+  pdf.setFont(undefined, 'bold');
+  pdf.text('Usuario', 14, y);
+  pdf.text('Fecha', 80, y);
+  pdf.text('Consumo (kWh)', 130, y);
+  pdf.line(14, y + 3, 195, y + 3);
+
+  y += 12;
+  pdf.setFont(undefined, 'normal');
+
+  filteredRecords.forEach((record) => {
+    if (y > 275) {
+      pdf.addPage();
+      y = 20;
+    }
+
+    const user = userRows.find(
+      (item) => item.id === record.userId
+    );
+
+    const userName = user ? user.name : 'Usuario no disponible';
+
+    pdf.text(userName.substring(0, 30), 14, y);
+    pdf.text(record.date, 80, y);
+    pdf.text(
+      record.consumption.toLocaleString('es-CO'),
+      130,
+      y
+    );
+
+    y += 9;
+  });
+
+  pdf.save('reporte-general-consumo-empower.pdf');
+
+  reportStatusHU5.textContent =
+    `Reporte generado correctamente. Se incluyeron ${filteredRecords.length} registros del período seleccionado.`;
+}
+
+if (generateReportHU5 && reportStatusHU5) {
+  generateReportHU5.addEventListener(
+    'click',
+    generateGeneralReportHU5
   );
 }
